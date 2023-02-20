@@ -71,7 +71,7 @@ public final class Main extends JavaPlugin implements Listener {
 
     count++;
   }
-  //ベッドにアクセスすると64サイズのアイテムの量が64になる
+  //プレイヤーがベッドにアクセスすると64サイズのアイテムの量が64になる
   @EventHandler
   public void onPlayerBedEnter(PlayerBedEnterEvent e) {
     Player player = e.getPlayer();
@@ -82,7 +82,7 @@ public final class Main extends JavaPlugin implements Listener {
     player.getInventory().setContents(itemstacks);
   }
 
-  //アイテムをまとめて捨てると消える(16以上)
+  //プレイヤーがアイテムをまとめて捨てると消える(16以上)
   @EventHandler
   public void onPlayerDropItem(PlayerDropItemEvent e) {
     ItemStack is = e.getItemDrop().getItemStack();
@@ -91,7 +91,7 @@ public final class Main extends JavaPlugin implements Listener {
     }
   }
 
-  //クラフトすると経験値がもらえる(500)
+  //プレイヤーがアイテムをクラフトすると経験値がもらえる(500)
   @EventHandler
   public void onCraftItem(CraftItemEvent e) {
     Player who = (Player) e.getWhoClicked();
