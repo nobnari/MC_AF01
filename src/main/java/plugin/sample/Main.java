@@ -5,19 +5,27 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
+import org.bukkit.entity.Goat;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
@@ -65,24 +73,26 @@ public final class Main extends JavaPlugin implements Listener {
         firework.setFireworkMeta(fireworkMeta);
       }
       Path path = Path.of("firework.txt");
-      Files.writeString(path, "boke");
+      Files.writeString(path, "!!!");
       player.sendMessage(Files.readString(path));
     }
 
     count++;
   }
-  //プレイヤーがベッドにアクセスすると64サイズのアイテムの量が64になる
+
+  //ベッドにアクセスすると64サイズのアイテムの量が64になる
   @EventHandler
   public void onPlayerBedEnter(PlayerBedEnterEvent e) {
     Player player = e.getPlayer();
     ItemStack[] itemstacks = player.getInventory().getContents();
-    Arrays.stream(itemstacks).filter(
+    Arrays.stream(itemstacks)
+        .filter(
             item -> Objects.nonNull(item) && item.getMaxStackSize() == 64 && item.getAmount() < 64)
         .forEach(item -> item.setAmount(64));
     player.getInventory().setContents(itemstacks);
   }
 
-  //プレイヤーがアイテムをまとめて捨てると消える(16以上)
+  //アイテムをまとめて捨てると消える(16以上)
   @EventHandler
   public void onPlayerDropItem(PlayerDropItemEvent e) {
     ItemStack is = e.getItemDrop().getItemStack();
@@ -91,11 +101,39 @@ public final class Main extends JavaPlugin implements Listener {
     }
   }
 
-  //プレイヤーがアイテムをクラフトすると経験値がもらえる(500)
+  //アイテムをクラフトすると経験値がもらえる(500)
   @EventHandler
   public void onCraftItem(CraftItemEvent e) {
     Player who = (Player) e.getWhoClicked();
     who.giveExp(500);
+  }
+
+  //アニマルスポーン　PlayerJoinEvent　playerRespawnEvent
+  @EventHandler
+  public void AnimalSpawn(PlayerJoinEvent e) {
+    World world = e.getPlayer().getWorld();
+    Location l = new Location(world, -122, 68, -318);
+    world.spawnEntity(l, EntityType.LLAMA);
+  }
+
+  ////叫ぶヤギ判別メソッド
+  @EventHandler
+  public void SearchScreamGoat(PlayerInteractEvent e) {
+    Material item = e.getMaterial();
+    Player player = e.getPlayer();
+    Location l = player.getLocation();
+    if (item == Material.GOAT_HORN) {
+      Collection<Entity> nearE = player.getWorld().getNearbyEntities(l, 32, 32, 32);
+      for (Entity entity : nearE) {
+        if (Objects.nonNull(entity) && entity instanceof Goat goat
+            && goat.isScreaming()) {
+          String s = "キィエエェェェエエェッッッ!!!";
+          player.sendMessage(s);
+        }
+      }
+    }
+
+
   }
 
 
