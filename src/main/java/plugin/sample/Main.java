@@ -25,7 +25,7 @@ import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
@@ -38,6 +38,8 @@ public final class Main extends JavaPlugin implements Listener {
   @Override
   public void onEnable() {
     Bukkit.getPluginManager().registerEvents(this, this);
+    getCommand("lvup").setExecutor(new LevelUpCommand());
+    getCommand("strike").setExecutor(new LightningCommand());
   }
 
   /**
@@ -45,42 +47,32 @@ public final class Main extends JavaPlugin implements Listener {
    *
    * @param e イベント
    */
+  //スニークで花火が上がる
   @EventHandler
   public void onPlayerToggleSneak(PlayerToggleSneakEvent e) throws IOException {
-
-    // イベント発生時のプレイヤーやワールドなどの情報を変数に持つ。
     Player player = e.getPlayer();
     World world = player.getWorld();
-
     List<Color> colors = new ArrayList<>(List.of(Color.RED, Color.AQUA, Color.ORANGE));
-
     if (count % 4 == 0) {
       for (Color col : colors) {
-        // 花火オブジェクトをプレイヤーのロケーション地点に対して出現させる。
         Firework firework = world.spawn(player.getLocation(), Firework.class);
-
-        // 花火オブジェクトが持つメタ情報を取得。
         FireworkMeta fireworkMeta = firework.getFireworkMeta();
-        // メタ情報に対して設定を追加したり、値の上書きを行う。
         fireworkMeta.addEffect(
             FireworkEffect.builder()
                 .withColor(col)
                 .withFlicker()
                 .build());
         fireworkMeta.setPower(1);
-
-        // 追加した情報で再設定する。
         firework.setFireworkMeta(fireworkMeta);
       }
       Path path = Path.of("firework.txt");
       Files.writeString(path, "!!!");
       player.sendMessage(Files.readString(path));
     }
-
     count++;
   }
 
-  //ベッドにアクセスすると64サイズのアイテムの量が64になる
+  //ベッドにアクセスするとサイズ64のアイテムの量が64になる
   @EventHandler
   public void onPlayerBedEnter(PlayerBedEnterEvent e) {
     Player player = e.getPlayer();
@@ -108,29 +100,27 @@ public final class Main extends JavaPlugin implements Listener {
     who.giveExp(500);
   }
 
-  //アニマルスポーン　PlayerJoinEvent　playerRespawnEvent
+  //プレイヤーリスポーンで特定の位置にラマ出現
   @EventHandler
-  public void AnimalSpawn(PlayerJoinEvent e) {
+  public void LlamaSpawn(PlayerRespawnEvent e) {
     World world = e.getPlayer().getWorld();
     Location l = new Location(world, -122, 68, -318);
     world.spawnEntity(l, EntityType.LLAMA);
   }
 
-  ////叫ぶヤギ判別メソッド
+  ////ヤギの角笛による叫ぶヤギ検出メソッド (範囲)
   @EventHandler
   public void SearchScreamGoat(PlayerInteractEvent e) {
     Material item = e.getMaterial();
     Player player = e.getPlayer();
     Location l = player.getLocation();
     if (item == Material.GOAT_HORN) {
-      Collection<Entity> nearE = player.getWorld().getNearbyEntities(l, 32, 32, 32);
-      for (Entity entity : nearE) {
-        if (Objects.nonNull(entity) && entity instanceof Goat goat
-            && goat.isScreaming()) {
-          String s = "キィエエェェェエエェッッッ!!!";
-          player.sendMessage(s);
-        }
-      }
+      Collection<Entity> nearby = player.getWorld().getNearbyEntities(l, 32, 32, 32);
+      nearby.stream()
+          .filter(entity -> Objects.nonNull(entity) && entity instanceof Goat goat
+              && goat.isScreaming())
+          .map(entity -> "キィエエェェェエエェッッッ!!!")
+          .forEach(player::sendMessage);
     }
 
 
