@@ -37,8 +37,9 @@ public final class Main extends JavaPlugin implements Listener {
 
   @Override
   public void onEnable() {
+    saveDefaultConfig();
     Bukkit.getPluginManager().registerEvents(this, this);
-    getCommand("lvup").setExecutor(new LevelUpCommand());
+    getCommand("lvup").setExecutor(new LevelUpCommand(this));
     getCommand("strike").setExecutor(new LightningCommand());
   }
 
@@ -116,11 +117,12 @@ public final class Main extends JavaPlugin implements Listener {
     Location l = player.getLocation();
     if (item == Material.GOAT_HORN) {
       Collection<Entity> nearby = player.getWorld().getNearbyEntities(l, 32, 32, 32);
-      nearby.stream()
-          .filter(entity -> Objects.nonNull(entity) && entity instanceof Goat goat
-              && goat.isScreaming())
-          .map(entity -> "キィエエェェェエエェッッッ!!!")
-          .forEach(player::sendMessage);
+      for (Entity entity : nearby) {
+        if (entity instanceof Goat goat && goat.isScreaming()) {
+          String voice = getConfig().getString("StrangeVoice");
+          player.sendMessage(voice);
+        }
+      }
     }
 
 
