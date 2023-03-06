@@ -15,12 +15,14 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.Goat;
+import org.bukkit.entity.Llama;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Slime;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -73,7 +75,7 @@ public final class Main extends JavaPlugin implements Listener {
     count++;
   }
 
-  //ベッドにアクセスするとサイズ64のアイテムの量が64になる
+  ////ベッドにアクセスするとサイズ64のアイテムの量が64になる
   @EventHandler
   public void onPlayerBedEnter(PlayerBedEnterEvent e) {
     Player player = e.getPlayer();
@@ -85,7 +87,7 @@ public final class Main extends JavaPlugin implements Listener {
     player.getInventory().setContents(itemstacks);
   }
 
-  //アイテムをまとめて捨てると消える(16以上)
+  ////アイテムをまとめて捨てると消える(16以上)
   @EventHandler
   public void onPlayerDropItem(PlayerDropItemEvent e) {
     ItemStack is = e.getItemDrop().getItemStack();
@@ -94,19 +96,21 @@ public final class Main extends JavaPlugin implements Listener {
     }
   }
 
-  //アイテムをクラフトすると経験値がもらえる(500)
+  ////アイテムをクラフトすると経験値がもらえる(500)
   @EventHandler
   public void onCraftItem(CraftItemEvent e) {
-    Player who = (Player) e.getWhoClicked();
-    who.giveExp(500);
+    if (e.getWhoClicked() instanceof Player player) {
+      player.giveExp(500);
+    }
+
   }
 
-  //プレイヤーリスポーンで特定の位置にラマ出現
+  ////プレイヤーリスポーンで特定の位置にラマ出現
   @EventHandler
   public void LlamaSpawn(PlayerRespawnEvent e) {
     World world = e.getPlayer().getWorld();
     Location l = new Location(world, -122, 68, -318);
-    world.spawnEntity(l, EntityType.LLAMA);
+    world.spawn(l, Llama.class);
   }
 
   ////ヤギの角笛による叫ぶヤギ検出メソッド (範囲)
@@ -119,15 +123,26 @@ public final class Main extends JavaPlugin implements Listener {
       Collection<Entity> nearby = player.getWorld().getNearbyEntities(l, 32, 32, 32);
       for (Entity entity : nearby) {
         if (entity instanceof Goat goat && goat.isScreaming()) {
-          String voice = getConfig().getString("StrangeVoice");
-          player.sendMessage(voice);
+          String scream = getConfig().getString("StrangeVoice");
+          player.sendMessage(scream);
         }
       }
     }
-
-
   }
 
+  ////耕した畑をジャンプで荒らすとプレイヤーの近くにスライム出現
+  @EventHandler
+  public void JumpingSlimeSpawn(PlayerInteractEvent e) {
+    Player player = e.getPlayer();
+    World world = player.getWorld();
+    Location l = player.getLocation();
+    Location l2 = new Location(world, l.getX() - 5, l.getY() + 5, l.getZ());
+    Material block = e.getClickedBlock().getType();
+    Action action = e.getAction();
+    if (action == Action.PHYSICAL && block == Material.FARMLAND) {
+      world.spawn(l2, Slime.class);
+    }
+  }
 
 }
 

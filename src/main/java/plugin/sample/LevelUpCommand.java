@@ -20,10 +20,12 @@ public class LevelUpCommand implements CommandExecutor {
       if (args.length == 1) {
         player.giveExpLevels(Integer.parseInt(args[0]));
       } else {
-        player.sendMessage(main.getConfig().getString("Message"));
+        player.sendMessage(main.getConfig().getString("ExceptionMessage"));
       }
 
     }
     return false;
   }
 }
+
+
