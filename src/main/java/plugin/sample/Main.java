@@ -139,13 +139,15 @@ public final class Main extends JavaPlugin implements Listener {
     World world = player.getWorld();
     Location l = player.getLocation();
     Location l2 = new Location(world, l.getX() - 3, l.getY() + 2, l.getZ() + 1);
-    Material block = e.getClickedBlock().getType();
     Action action = e.getAction();
-    if (Objects.nonNull(block)
-        && block == Material.FARMLAND
-        && action == Action.PHYSICAL) {
-      world.spawn(l2, Slime.class);
+    if (Objects.nonNull(e.getClickedBlock())) {
+      Material block = e.getClickedBlock().getType();
+      if (block == Material.FARMLAND
+          && action == Action.PHYSICAL) {
+        world.spawn(l2, Slime.class);
+      }
     }
+
   }
 
   /**
