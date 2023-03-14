@@ -1,9 +1,10 @@
-package plugin.sample;
+package plugin.sample.command;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import plugin.sample.Main;
 
 public class LevelUpCommand implements CommandExecutor {
 
@@ -13,7 +14,13 @@ public class LevelUpCommand implements CommandExecutor {
     this.main = m;
   }
 
-  //レベルコントロールコマンド(実行部)
+  /**レベルをプラスマイナスするコマンド実行部
+   * @param sender Source of the command
+   * @param command Command which was executed
+   * @param label Alias of the command which was used
+   * @param args Passed command arguments
+   * @return
+   */
   @Override
   public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
     if (sender instanceof Player player) {

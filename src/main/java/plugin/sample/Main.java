@@ -1,24 +1,15 @@
 package plugin.sample;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 import java.util.Objects;
 import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.FireworkEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.Firework;
 import org.bukkit.entity.Goat;
-import org.bukkit.entity.Llama;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Slime;
 import org.bukkit.event.EventHandler;
@@ -29,15 +20,15 @@ import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.plugin.java.JavaPlugin;
+import plugin.sample.command.LevelUpCommand;
+import plugin.sample.command.LightningCommand;
 
 public final class Main extends JavaPlugin implements Listener {
 
-  private int count = 1;
+  private int count;
 
   @Override
   public void onEnable() {
@@ -47,32 +38,38 @@ public final class Main extends JavaPlugin implements Listener {
     getCommand("strike").setExecutor(new LightningCommand());
   }
 
-  //スニークで花火が上がる
+  /**
+   * スニークでチャット欄に座標と向いている方角を表示
+   *
+   * @param e 　プレイヤースニーク時
+   */
   @EventHandler
-  public void onPlayerToggleSneak(PlayerToggleSneakEvent e) throws IOException {
+  public void onPlayerToggleSneak(PlayerToggleSneakEvent e) {
     Player player = e.getPlayer();
-    World world = player.getWorld();
-    List<Color> colors = new ArrayList<>(List.of(Color.RED, Color.AQUA, Color.ORANGE));
-    if (count % 4 == 0) {
-      for (Color col : colors) {
-        Firework firework = world.spawn(player.getLocation(), Firework.class);
-        FireworkMeta fireworkMeta = firework.getFireworkMeta();
-        fireworkMeta.addEffect(
-            FireworkEffect.builder()
-                .withColor(col)
-                .withFlicker()
-                .build());
-        fireworkMeta.setPower(1);
-        firework.setFireworkMeta(fireworkMeta);
-      }
-      Path path = Path.of("firework.txt");
-      Files.writeString(path, "!!!");
-      player.sendMessage(Files.readString(path));
+    Location l = player.getLocation();
+    String X = new String();
+    String Z = new String();
+    if ((int) l.getX() < 0) {
+      X = "W " + (int) l.getX() * -1;
+    } else if ((int) l.getX() > 0) {
+      X = "E " + (int) l.getX();
+    }
+    if ((int) l.getZ() < 0) {
+      Z = "N " + (int) l.getZ() * -1;
+    } else if ((int) l.getZ() > 0) {
+      Z = "S " + (int) l.getZ();
+    }
+    if (count % 2 == 0) {
+      player.sendMessage(X + "  " + Z + "   H " + (int) l.getY() + "     " + player.getFacing());
     }
     count++;
   }
 
-  ////ベッドにアクセスするとサイズ64のアイテムの量が64になる
+  /**
+   * ベッドにアクセスするとサイズ64のアイテムの量が64になる
+   *
+   * @param e ベッドタッチ時
+   */
   @EventHandler
   public void onPlayerBedEnter(PlayerBedEnterEvent e) {
     Player player = e.getPlayer();
@@ -84,7 +81,11 @@ public final class Main extends JavaPlugin implements Listener {
     player.getInventory().setContents(itemStacks);
   }
 
-  ////アイテムをまとめて捨てると消える(16以上)
+  /**
+   * アイテムをまとめて捨てると消える(16以上)
+   *
+   * @param e プレイヤードロップ時
+   */
   @EventHandler
   public void onPlayerDropItem(PlayerDropItemEvent e) {
     ItemStack is = e.getItemDrop().getItemStack();
@@ -93,7 +94,11 @@ public final class Main extends JavaPlugin implements Listener {
     }
   }
 
-  ////アイテムをクラフトすると経験値がもらえる(500)
+  /**
+   * アイテムをクラフトすると経験値がもらえる(500)
+   *
+   * @param e プレイヤークラフトアイテム時
+   */
   @EventHandler
   public void onCraftItem(CraftItemEvent e) {
     if (e.getWhoClicked() instanceof Player player) {
@@ -102,17 +107,13 @@ public final class Main extends JavaPlugin implements Listener {
 
   }
 
-  ////プレイヤーリスポーンで特定の位置にラマ出現
+  /**
+   * ヤギの角笛による叫ぶヤギ検出メソッド (範囲)
+   *
+   * @param e ヤギの角笛使用時
+   */
   @EventHandler
-  public void onRespawn_LlamaSpawn(PlayerRespawnEvent e) {
-    World world = e.getPlayer().getWorld();
-    Location l = new Location(world, -122, 68, -318);
-    world.spawn(l, Llama.class);
-  }
-
-  ////ヤギの角笛による叫ぶヤギ検出メソッド (範囲)
-  @EventHandler
-  public void onSearch_ScreamGoat(PlayerInteractEvent e) {
+  public void onUseGoatHone(PlayerInteractEvent e) {
     Material item = e.getMaterial();
     Player player = e.getPlayer();
     Location l = player.getLocation();
@@ -127,21 +128,31 @@ public final class Main extends JavaPlugin implements Listener {
     }
   }
 
-  ////耕した畑をジャンプで荒らすとプレイヤーの近くにスライム出現
+  /**
+   * 耕した畑をジャンプで荒らすとプレイヤーの近くにスライム出現
+   *
+   * @param e 耕地着地時
+   */
   @EventHandler
-  public void onJump_SlimeSpawn(PlayerInteractEvent e) {
+  public void onJumpIntoSoil(PlayerInteractEvent e) {
     Player player = e.getPlayer();
     World world = player.getWorld();
     Location l = player.getLocation();
-    Location l2 = new Location(world, l.getX() - 4, l.getY() + 3, l.getZ() + 2);
+    Location l2 = new Location(world, l.getX() - 3, l.getY() + 2, l.getZ() + 1);
     Material block = e.getClickedBlock().getType();
     Action action = e.getAction();
-    if (block == Material.FARMLAND && action == Action.PHYSICAL) {
+    if (Objects.nonNull(block)
+        && block == Material.FARMLAND
+        && action == Action.PHYSICAL) {
       world.spawn(l2, Slime.class);
     }
   }
 
-  ////金でカボチャケーキ作る
+  /**
+   * 金でカボチャケーキ作る
+   *
+   * @param e
+   */
   @EventHandler
   public void onBlockPlace(BlockPlaceEvent e) {
     Block block = e.getBlockPlaced();
@@ -154,6 +165,7 @@ public final class Main extends JavaPlugin implements Listener {
       block.setType(Material.AIR);
     }
   }
+
 }
 
 
