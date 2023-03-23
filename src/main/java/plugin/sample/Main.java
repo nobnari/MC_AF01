@@ -1,11 +1,16 @@
 package plugin.sample;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
+import java.util.SplittableRandom;
 import org.bukkit.Bukkit;
+import org.bukkit.EntityEffect;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
@@ -19,6 +24,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.ItemStack;
@@ -29,6 +35,7 @@ import plugin.sample.command.LightningCommand;
 public final class Main extends JavaPlugin implements Listener {
 
   private int count;
+  private int count2;
 
   @Override
   public void onEnable() {
@@ -47,17 +54,17 @@ public final class Main extends JavaPlugin implements Listener {
   public void onPlayerToggleSneak(PlayerToggleSneakEvent e) {
     Player player = e.getPlayer();
     Location l = player.getLocation();
-    String X = new String();
-    String Z = new String();
+    String X = "";
+    String Z = "";
     if ((int) l.getX() < 0) {
-      X = "W " + (int) l.getX() * -1;
+      X = "西 " + (int) l.getX() * -1;
     } else if ((int) l.getX() > 0) {
-      X = "E " + (int) l.getX();
+      X = "東 " + (int) l.getX();
     }
     if ((int) l.getZ() < 0) {
-      Z = "N " + (int) l.getZ() * -1;
+      Z = "北 " + (int) l.getZ() * -1;
     } else if ((int) l.getZ() > 0) {
-      Z = "S " + (int) l.getZ();
+      Z = "南 " + (int) l.getZ();
     }
     if (count % 2 == 0) {
       player.sendMessage(X + "  " + Z + "   H " + (int) l.getY() + "     " + player.getFacing());
@@ -113,7 +120,7 @@ public final class Main extends JavaPlugin implements Listener {
    * @param e ヤギの角笛使用時
    */
   @EventHandler
-  public void onUseGoatHone(PlayerInteractEvent e) {
+  public void GoatHorn(PlayerInteractEvent e) {
     Material item = e.getMaterial();
     Player player = e.getPlayer();
     Location l = player.getLocation();
@@ -126,6 +133,28 @@ public final class Main extends JavaPlugin implements Listener {
         }
       }
     }
+  }
+
+  @EventHandler
+  public void PaperGoat(PlayerInteractEntityEvent e) {
+    Player player = e.getPlayer();
+    Entity entity = e.getRightClicked();
+    ItemStack mainItem = player.getInventory().getItemInMainHand();
+    if (count2 % 2 == 0 && mainItem.getType().equals(Material.PAPER) && entity instanceof Goat goat
+        && goat.isScreaming()) {
+      int amount = mainItem.getAmount();
+      mainItem.setAmount(amount - 1);
+
+      goat.playEffect(EntityEffect.LOVE_HEARTS);
+      player.playSound(player.getLocation(), Sound.ENTITY_GOAT_SCREAMING_PREPARE_RAM, 30, 45);
+
+      List<String> screamList = new ArrayList<>(getConfig().getStringList("StrangeVoiceList"));
+      int random = new SplittableRandom().nextInt(screamList.size());
+      player.sendMessage(screamList.get(random));
+    }
+    count2++;
+
+
   }
 
   /**
