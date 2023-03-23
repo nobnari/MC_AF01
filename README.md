@@ -1,6 +1,6 @@
 ## Overview　
-Collection of small additions to **"Minecraft"**.
-Intended to run on a **"Spigot"** server.
+Collection of small additions to **"Minecraft"**.  
+Intended to run on a **"Spigot"** server.  
 To use, plug **SNAPSHOT.jar** into the plugin directory.
 
 ## Examples
