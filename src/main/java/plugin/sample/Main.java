@@ -13,6 +13,8 @@ import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Cat;
+import org.bukkit.entity.Cat.Type;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Goat;
 import org.bukkit.entity.Player;
@@ -23,11 +25,15 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
+import org.bukkit.event.player.PlayerBedLeaveEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.loot.LootContext;
+import org.bukkit.loot.LootContext.Builder;
+import org.bukkit.loot.LootTables;
 import org.bukkit.plugin.java.JavaPlugin;
 import plugin.sample.command.LevelUpCommand;
 import plugin.sample.command.LightningCommand;
@@ -35,7 +41,6 @@ import plugin.sample.command.LightningCommand;
 public final class Main extends JavaPlugin implements Listener {
 
   private int count;
-  private int count2;
 
   @Override
   public void onEnable() {
@@ -68,6 +73,7 @@ public final class Main extends JavaPlugin implements Listener {
     }
     if (count % 2 == 0) {
       player.sendMessage(X + "  " + Z + "   H " + (int) l.getY() + "     " + player.getFacing());
+      player.getWorld().spawn(l, Cat.class);
     }
     count++;
   }
@@ -135,15 +141,20 @@ public final class Main extends JavaPlugin implements Listener {
     }
   }
 
+  /**
+   * 叫ぶヤギに紙を与えるとハートが出て叫ぶ
+   *
+   * @param e 　メインハンドに紙を持ってヤギに触れた時
+   */
   @EventHandler
   public void PaperGoat(PlayerInteractEntityEvent e) {
     Player player = e.getPlayer();
     Entity entity = e.getRightClicked();
     ItemStack mainItem = player.getInventory().getItemInMainHand();
-    if (count2 % 2 == 0 && mainItem.getType().equals(Material.PAPER) && entity instanceof Goat goat
+    if (count % 2 == 0 && mainItem.getType().equals(Material.PAPER) && entity instanceof Goat goat
         && goat.isScreaming()) {
-      int amount = mainItem.getAmount();
-      mainItem.setAmount(amount - 1);
+
+      mainItem.setAmount(mainItem.getAmount() - 1);
 
       goat.playEffect(EntityEffect.LOVE_HEARTS);
       player.playSound(player.getLocation(), Sound.ENTITY_GOAT_SCREAMING_PREPARE_RAM, 30, 45);
@@ -152,9 +163,7 @@ public final class Main extends JavaPlugin implements Listener {
       int random = new SplittableRandom().nextInt(screamList.size());
       player.sendMessage(screamList.get(random));
     }
-    count2++;
-
-
+    count++;
   }
 
   /**
@@ -176,13 +185,12 @@ public final class Main extends JavaPlugin implements Listener {
         world.spawn(l2, Slime.class);
       }
     }
-
   }
 
   /**
    * 金でカボチャケーキ作る
    *
-   * @param e
+   * @param e 　ブロック配置
    */
   @EventHandler
   public void onBlockPlace(BlockPlaceEvent e) {
@@ -197,6 +205,53 @@ public final class Main extends JavaPlugin implements Listener {
     }
   }
 
+  /**
+   * 特定のアイテムを持って猫に触れると猫の毛色を変化する(黒、白、それ以外)
+   *
+   * @param e 　猫と交流時
+   */
+  @EventHandler
+  public void CatColorChange(PlayerInteractEntityEvent e) {
+    Player player = e.getPlayer();
+    Entity entity = e.getRightClicked();
+    ItemStack mainItem = player.getInventory().getItemInMainHand();
+    if (count % 2 == 0 && entity instanceof Cat cat) {
+      switch (mainItem.getType()) {
+        case INK_SAC -> {
+          cat.setCatType(Type.ALL_BLACK);
+          mainItem.setAmount(mainItem.getAmount() - 1);
+        }
+        case MILK_BUCKET -> {
+          cat.setCatType(Type.WHITE);
+          mainItem.setType(Material.BUCKET);
+        }
+        case RABBIT_FOOT -> {
+          List<String> cats = getConfig().getStringList("CatColor");
+          int i = new SplittableRandom().nextInt(cats.size());
+          cat.setCatType(Type.valueOf(cats.get(i)));
+          mainItem.setAmount(mainItem.getAmount() - 1);
+        }
+      }
+    }
+  }
+
+  @EventHandler
+  public void CatColorChange(PlayerBedLeaveEvent e) {
+    Player player = e.getPlayer();
+    World world = player.getWorld();
+    for (Entity entity : player.getNearbyEntities(3, 3, 3)) {
+      if (entity instanceof Cat cat && !cat.isSitting()) {
+
+        LootContext context = new Builder(cat.getLocation()).build();
+        Collection<ItemStack> itemStacks = LootTables.ANCIENT_CITY_ICE_BOX.getLootTable()
+            .populateLoot(null, context);
+
+        for (ItemStack itemStack : itemStacks) {
+          world.dropItem(cat.getLocation(), itemStack);
+        }
+      }
+    }
+  }
 }
 
 
