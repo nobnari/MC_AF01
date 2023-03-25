@@ -73,7 +73,6 @@ public final class Main extends JavaPlugin implements Listener {
     }
     if (count % 2 == 0) {
       player.sendMessage(X + "  " + Z + "   H " + (int) l.getY() + "     " + player.getFacing());
-      player.getWorld().spawn(l, Cat.class);
     }
     count++;
   }
@@ -216,7 +215,8 @@ public final class Main extends JavaPlugin implements Listener {
     Entity entity = e.getRightClicked();
     ItemStack mainItem = player.getInventory().getItemInMainHand();
     if (count % 2 == 0 && entity instanceof Cat cat) {
-      switch (mainItem.getType()) {
+      Material type = mainItem.getType();
+      switch (type) {
         case INK_SAC -> {
           cat.setCatType(Type.ALL_BLACK);
           mainItem.setAmount(mainItem.getAmount() - 1);
@@ -235,19 +235,29 @@ public final class Main extends JavaPlugin implements Listener {
     }
   }
 
+  /**
+   * プレイヤーが朝起きた時 黒猫と白猫が座ってない状態で近くにいるとプレゼントが豪華になる
+   *
+   * @param e 　プレイヤーが朝起きた時
+   */
   @EventHandler
-  public void CatColorChange(PlayerBedLeaveEvent e) {
+  public void CatTreasurePresent(PlayerBedLeaveEvent e) {
     Player player = e.getPlayer();
     World world = player.getWorld();
-    for (Entity entity : player.getNearbyEntities(3, 3, 3)) {
+    for (Entity entity : player.getNearbyEntities(2, 2, 2)) {
       if (entity instanceof Cat cat && !cat.isSitting()) {
-
         LootContext context = new Builder(cat.getLocation()).build();
-        Collection<ItemStack> itemStacks = LootTables.ANCIENT_CITY_ICE_BOX.getLootTable()
-            .populateLoot(null, context);
-
-        for (ItemStack itemStack : itemStacks) {
-          world.dropItem(cat.getLocation(), itemStack);
+        switch (cat.getCatType()) {
+          case ALL_BLACK -> {
+            Collection<ItemStack> itemStacks = LootTables.WOODLAND_MANSION.getLootTable()
+                .populateLoot(null, context);
+            itemStacks.forEach(itemStack -> world.dropItem(cat.getLocation(), itemStack));
+          }
+          case WHITE -> {
+            Collection<ItemStack> itemStacks = LootTables.ANCIENT_CITY_ICE_BOX.getLootTable()
+                .populateLoot(null, context);
+            itemStacks.forEach(itemStack -> world.dropItem(cat.getLocation(), itemStack));
+          }
         }
       }
     }
