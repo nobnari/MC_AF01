@@ -249,7 +249,7 @@ public final class Main extends JavaPlugin implements Listener {
         LootContext context = new Builder(cat.getLocation()).build();
         switch (cat.getCatType()) {
           case ALL_BLACK -> {
-            Collection<ItemStack> itemStacks = LootTables.WOODLAND_MANSION.getLootTable()
+            Collection<ItemStack> itemStacks = LootTables.ANCIENT_CITY.getLootTable()
                 .populateLoot(null, context);
             itemStacks.forEach(itemStack -> world.dropItem(cat.getLocation(), itemStack));
           }
@@ -262,6 +262,27 @@ public final class Main extends JavaPlugin implements Listener {
       }
     }
   }
+
+  /**
+   * ダイヤモンドのクワを空気に振るうと目線の先にテレポートする。 プレイヤーの向きはテレポート前と同じになる。
+   *
+   * @param e 　ダイヤのクワを振るった時
+   */
+  @EventHandler
+  public void DiamondHoeTeleport(PlayerInteractEvent e) {
+    Player player = e.getPlayer();
+    Location l = player.getLocation();
+    Location l2 = player.getTargetBlock(null, 100).getLocation();
+    ItemStack mainItem = player.getInventory().getItemInMainHand();
+    if (mainItem.getType() == Material.DIAMOND_HOE && e.getAction() == Action.RIGHT_CLICK_AIR) {
+      Location location = l2.setDirection(l.getDirection().toBlockVector());
+      player.teleport(location);
+      player.playSound(player.getLocation(), Sound.ENTITY_FOX_TELEPORT, 30, 45);
+      player.setCooldown(Material.DIAMOND_HOE, 20);
+    }
+  }
+
+ 
 }
 
 
