@@ -29,12 +29,14 @@ import org.bukkit.event.player.PlayerBedLeaveEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.loot.LootContext;
 import org.bukkit.loot.LootContext.Builder;
 import org.bukkit.loot.LootTables;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.Vector;
 import plugin.sample.command.LevelUpCommand;
 import plugin.sample.command.LightningCommand;
 
@@ -282,7 +284,26 @@ public final class Main extends JavaPlugin implements Listener {
     }
   }
 
- 
+  /**
+   * プレイヤーが金のブーツを履いてを歩くと、ワンブロック前方の溶岩が黒曜石に変わる。
+   *
+   * @param e プレイヤーが歩いた時
+   */
+  @EventHandler
+  public void onPlayerLavaWalk(PlayerMoveEvent e) {
+    Player player = e.getPlayer();
+    Location location = player.getLocation();
+    Vector vector = location.getDirection();
+    Location locationB = location.add(vector);
+    World world = player.getWorld();
+    if (Objects.nonNull(player.getInventory().getBoots())
+        && player.getInventory().getBoots().getType() == Material.GOLDEN_BOOTS
+        && world.getBlockAt(locationB).getType() == Material.LAVA) {
+      world.getBlockAt(locationB).setType(Material.OBSIDIAN);
+    }
+  }
+
+
 }
 
 
