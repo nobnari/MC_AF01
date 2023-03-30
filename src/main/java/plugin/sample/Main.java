@@ -303,6 +303,24 @@ public final class Main extends JavaPlugin implements Listener {
     }
   }
 
+  /**
+   * プレイヤーが黒曜石の上に氷塊を乗せると、黒曜石が溶岩に変わる アイテムとして氷をドロップする
+   *
+   * @param e プレイヤーが氷を乗せた時
+   */
+  @EventHandler
+  public void onPlayerIcePlace(BlockPlaceEvent e) {
+    Player player = e.getPlayer();
+    World world = player.getWorld();
+    Location l = e.getBlock().getLocation();
+    Location l2 = new Location(world, l.getX(), l.getY() - 1, l.getZ());
+    if (e.getBlock().getType() == Material.PACKED_ICE
+        && world.getBlockAt(l2).getType() == Material.OBSIDIAN) {
+      world.getBlockAt(l2).setType(Material.LAVA);
+      world.getBlockAt(l).setType(Material.AIR);
+      world.dropItem(l, new ItemStack(Material.ICE));
+    }
+  }
 
 }
 
