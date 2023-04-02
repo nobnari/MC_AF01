@@ -23,6 +23,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBedLeaveEvent;
@@ -205,6 +206,19 @@ public final class Main extends JavaPlugin implements Listener {
       block.setType(Material.AIR);
     }
   }
+
+  /**
+   * プレイヤーが死んだらその地点にアイテムとビーコンがドロップ
+   *
+   * @param e 　プレイヤー死亡時
+   */
+    @EventHandler
+    public void onPlayerDeath(PlayerDeathEvent e) {
+        Player player = e.getEntity();
+        World world = player.getWorld();
+        Location l = player.getLocation();
+        world.dropItemNaturally(l, new ItemStack(Material.BEACON));
+    }
 
   /**
    * 特定のアイテムを持って猫に触れると猫の毛色を変化する(黒、白、それ以外)
