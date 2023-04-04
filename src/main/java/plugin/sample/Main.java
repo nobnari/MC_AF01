@@ -6,12 +6,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.SplittableRandom;
-import org.bukkit.Bukkit;
-import org.bukkit.EntityEffect;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.World;
+
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Cat;
 import org.bukkit.entity.Cat.Type;
@@ -74,7 +70,7 @@ public final class Main extends JavaPlugin implements Listener {
     } else if ((int) l.getZ() > 0) {
       Z = "南 " + (int) l.getZ();
     }
-    if (count % 2 == 0) {
+    if (count % 2 == 1) {
       player.sendMessage(X + "  " + Z + "   H " + (int) l.getY() + "     " + player.getFacing());
     }
     count++;
@@ -208,17 +204,18 @@ public final class Main extends JavaPlugin implements Listener {
   }
 
   /**
-   * プレイヤーが死んだらその地点にアイテムとビーコンがドロップ
+   * プレイヤーが走ってる間、プレイヤーの向いている方向に炎が出る
    *
-   * @param e 　プレイヤー死亡時
+   * @param e 　プレイヤーが走った時
    */
-    @EventHandler
-    public void onPlayerDeath(PlayerDeathEvent e) {
-        Player player = e.getEntity();
-        World world = player.getWorld();
-        Location l = player.getLocation();
-        world.dropItemNaturally(l, new ItemStack(Material.BEACON));
+  @EventHandler
+  public void onPlayerRun(PlayerMoveEvent e) {
+    Player player = e.getPlayer();
+    if (player.isSprinting()) {
+      Location location = player.getLocation();
+      player.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME,location, 10);
     }
+  }
 
   /**
    * 特定のアイテムを持って猫に触れると猫の毛色を変化する(黒、白、それ以外)
