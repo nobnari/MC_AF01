@@ -9,30 +9,22 @@ import java.util.SplittableRandom;
 
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Cat;
+import org.bukkit.entity.*;
 import org.bukkit.entity.Cat.Type;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Goat;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Slime;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.*;
 import org.bukkit.event.inventory.CraftItemEvent;
-import org.bukkit.event.player.PlayerBedEnterEvent;
-import org.bukkit.event.player.PlayerBedLeaveEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.loot.LootContext;
 import org.bukkit.loot.LootContext.Builder;
 import org.bukkit.loot.LootTables;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import plugin.sample.command.LevelUpCommand;
 import plugin.sample.command.LightningCommand;
@@ -277,7 +269,7 @@ public final class Main extends JavaPlugin implements Listener {
   }
 
   /**
-   * ダイヤモンドのクワを空気に振るうと目線の先にテレポートする。 プレイヤーの向きはテレポート前と同じになる。
+   * 金のクワを空気に振るうと目線の先にテレポートする。 プレイヤーの向きはテレポート前と同じになる。
    *
    * @param e 　ダイヤのクワを振るった時
    */
@@ -287,11 +279,11 @@ public final class Main extends JavaPlugin implements Listener {
     Location l = player.getLocation();
     Location l2 = player.getTargetBlock(null, 100).getLocation();
     ItemStack mainItem = player.getInventory().getItemInMainHand();
-    if (mainItem.getType() == Material.DIAMOND_HOE && e.getAction() == Action.RIGHT_CLICK_AIR) {
+    if (mainItem.getType() == Material.GOLDEN_HOE && e.getAction() == Action.RIGHT_CLICK_AIR) {
       Location location = l2.setDirection(l.getDirection().toBlockVector());
       player.teleport(location);
       player.playSound(player.getLocation(), Sound.ENTITY_FOX_TELEPORT, 30, 45);
-      player.setCooldown(Material.DIAMOND_HOE, 20);
+      player.setCooldown(Material.GOLDEN_HOE, 20);
     }
   }
 
@@ -332,6 +324,27 @@ public final class Main extends JavaPlugin implements Listener {
       world.dropItem(l, new ItemStack(Material.ICE));
     }
   }
+
+  /**
+   * 襲撃者がダメージを食らうと近くにいるエンティティのリストを作り
+   * その中の襲撃者のドロップテーブルが宝釣りのテーブルに変わる
+   *
+   * @param e 襲撃者がダメージを食らった時
+   */
+    @EventHandler
+    public void onPillagerDamage(EntityDamageEvent e) {
+        if (e.getEntity() instanceof Pillager pillager) {
+            List<Entity> entityList = pillager.getNearbyEntities(16, 2, 16);
+            for (Entity entity : entityList) {
+              if (entity instanceof Pillager pillager2) {
+               pillager2.setLootTable(LootTables.FISHING_TREASURE.getLootTable());
+
+            }
+          }
+        }
+    }
+
+
 
 }
 
