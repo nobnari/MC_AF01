@@ -196,7 +196,7 @@ public final class Main extends JavaPlugin implements Listener {
   }
 
   /**
-   * プレイヤーが走ってる間、プレイヤーの向いている方向に炎が出る
+   * プレイヤーが走ってる間、プレイヤーの周りに炎が出る
    *
    * @param e 　プレイヤーが走った時
    */
@@ -205,7 +205,7 @@ public final class Main extends JavaPlugin implements Listener {
     Player player = e.getPlayer();
     if (player.isSprinting()) {
       Location location = player.getLocation();
-      player.getWorld().spawnParticle(Particle.SOUL_FIRE_FLAME,location, 10);
+      player.getWorld().spawnParticle(Particle.FLAME, location, 10);
     }
   }
 
@@ -246,7 +246,7 @@ public final class Main extends JavaPlugin implements Listener {
    * @param e 　プレイヤーが朝起きた時
    */
   @EventHandler
-  public void CatTreasurePresent(PlayerBedLeaveEvent e) {
+  public void CatMorningGift(PlayerBedLeaveEvent e) {
     Player player = e.getPlayer();
     World world = player.getWorld();
     for (Entity entity : player.getNearbyEntities(2, 2, 2)) {
@@ -271,7 +271,7 @@ public final class Main extends JavaPlugin implements Listener {
   /**
    * 金のクワを空気に振るうと目線の先にテレポートする。 プレイヤーの向きはテレポート前と同じになる。
    *
-   * @param e 　ダイヤのクワを振るった時
+   * @param e 　金のクワを振るった時
    */
   @EventHandler
   public void DiamondHoeTeleport(PlayerInteractEvent e) {
@@ -283,7 +283,6 @@ public final class Main extends JavaPlugin implements Listener {
       Location location = l2.setDirection(l.getDirection().toBlockVector());
       player.teleport(location);
       player.playSound(player.getLocation(), Sound.ENTITY_FOX_TELEPORT, 30, 45);
-      player.setCooldown(Material.GOLDEN_HOE, 20);
     }
   }
 
@@ -344,7 +343,30 @@ public final class Main extends JavaPlugin implements Listener {
         }
     }
 
-
+  /**
+   * クリーパーが爆発しようとする時、近くにダイヤモンドの帽子をかぶったプレイヤーがいると爆発しない
+   * また、クリーパーがプレイヤーに対して、少し上昇して離れる
+   *
+   * @param e クリーパーが爆発しようとした時
+   */
+  @EventHandler
+  public void defuseCreeper(ExplosionPrimeEvent e) {
+    if (e.getEntity() instanceof Creeper creeper) {
+      List<Entity> entityList = creeper.getNearbyEntities(16, 2, 16);
+      for (Entity entity : entityList) {
+        if (entity instanceof Player player) {
+          ItemStack helmet = player.getInventory().getHelmet();
+          if (Objects.nonNull(helmet) && helmet.getType() == Material.DIAMOND_HELMET) {
+            e.setCancelled(true);
+            Location l = creeper.getLocation();
+            Vector v = l.getDirection();
+            Vector v2 = v.multiply(-0.7).setY(0.8);
+            creeper.setVelocity(v2);
+          }
+        }
+      }
+    }
+  }
 
 }
 
