@@ -23,8 +23,6 @@ import org.bukkit.loot.LootContext;
 import org.bukkit.loot.LootContext.Builder;
 import org.bukkit.loot.LootTables;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.potion.PotionEffect;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
 import plugin.sample.command.LevelUpCommand;
 import plugin.sample.command.LightningCommand;
@@ -269,6 +267,23 @@ public final class Main extends JavaPlugin implements Listener {
   }
 
   /**
+   * ピンクの羊がターゲットする時、羊の歩いた後に花が生える
+   *
+   * @param e 　ヒツジがプレイヤー見る時
+   */
+
+  @EventHandler
+  public void sheepWalker(EntityTargetLivingEntityEvent e) {
+    if (e.getEntity() instanceof Sheep sheep && sheep.getColor() == DyeColor.PINK) {
+      Location location = sheep.getLocation();
+      List<String> flowers = getConfig().getStringList("flowers");
+      int i = new SplittableRandom().nextInt(flowers.size());
+      location.getBlock().setType(Material.valueOf(flowers.get(i)));
+
+    }
+  }
+
+  /**
    * 金のクワを空気に振るうと目線の先にテレポートする。 プレイヤーの向きはテレポート前と同じになる。
    *
    * @param e 　金のクワを振るった時
@@ -367,6 +382,24 @@ public final class Main extends JavaPlugin implements Listener {
       }
     }
   }
+
+//  /**
+//   * スニークスポナー(検証用)
+//   * @param e　プレイヤーがスニークした時
+//   */
+//  @EventHandler
+//  public void onPlayerSneak(PlayerToggleSneakEvent e) {
+//    Player player = e.getPlayer();
+//    Location l = player.getLocation();
+//    World world = player.getWorld();
+//    if (e.isSneaking()) {
+//      Entity entity= world.spawnEntity(l, EntityType.SHEEP);
+//if (entity instanceof Sheep sheep ) {
+//  sheep.setColor(DyeColor.PINK);
+//}
+//
+//    }
+//  }
 
 }
 
