@@ -302,6 +302,21 @@ public final class Main extends JavaPlugin implements Listener {
   }
 
   /**
+   * プレイヤーが金の斧を振ると、プレイヤーの速度を上昇させる
+   * @param e プレイヤーが金の斧を振った時
+   */
+  @EventHandler
+
+  public void onPlayerGoldAxeSwing(PlayerInteractEvent e) {
+    Player player = e.getPlayer();
+    ItemStack mainItem = player.getInventory().getItemInMainHand();
+    if (mainItem.getType() == Material.GOLDEN_AXE && e.getAction() == Action.RIGHT_CLICK_AIR) {
+      player.setVelocity(player.getLocation().getDirection().multiply(1.5));
+
+    }
+  }
+
+  /**
    * プレイヤーが金のブーツを履いてを歩くと、ワンブロック前方の溶岩が黒曜石に変わる。
    *
    * @param e プレイヤーが歩いた時
