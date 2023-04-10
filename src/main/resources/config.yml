@@ -35,3 +35,8 @@ flowers:
   - "ROSE_BUSH"
   - "PEONY"
   - "TALL_GRASS"
+mushrooms:
+  - "BROWN_MUSHROOM"
+  - "RED_MUSHROOM"
+  - "CRIMSON_FUNGUS"
+  - "WARPED_FUNGUS"
