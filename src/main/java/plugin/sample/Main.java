@@ -271,7 +271,6 @@ public final class Main extends JavaPlugin implements Listener {
    *
    * @param e 　ヒツジがプレイヤー見る時
    */
-
   @EventHandler
   public void sheepWalker(EntityTargetLivingEntityEvent e) {
     if (e.getEntity() instanceof Sheep sheep && sheep.getColor() == DyeColor.PINK) {
@@ -306,7 +305,6 @@ public final class Main extends JavaPlugin implements Listener {
    * @param e プレイヤーが金の斧を振った時
    */
   @EventHandler
-
   public void onPlayerGoldAxeSwing(PlayerInteractEvent e) {
     Player player = e.getPlayer();
     ItemStack mainItem = player.getInventory().getItemInMainHand();
@@ -397,6 +395,23 @@ public final class Main extends JavaPlugin implements Listener {
       }
     }
   }
+
+//  /**
+//   * プレイヤーがジャンプ速度で地面を離れると、４種の中から1つランダムでキノコが生える(検証用)
+//   *
+//   * @param e プレイヤーがジャンプした時
+//   */
+//  @EventHandler
+//  public void onPlayerJump(PlayerMoveEvent e) {
+//    Player player = e.getPlayer();
+//    Location fromL = e.getFrom();
+//    World world = player.getWorld();
+//    if (player.getVelocity().getY() > 0.4&& world.getBlockAt(fromL).getType()== Material.AIR) {
+//      List<String> mushrooms = getConfig().getStringList("mushrooms");
+//      int i = new SplittableRandom().nextInt(4);
+//      fromL.getBlock().setType(Material.valueOf(mushrooms.get(i)));
+//    }
+//  }
 
 //  /**
 //   * スニークスポナー(検証用)
