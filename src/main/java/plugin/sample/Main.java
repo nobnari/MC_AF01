@@ -1,12 +1,5 @@
 package plugin.sample;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.SplittableRandom;
-
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
@@ -15,7 +8,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.entity.*;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityTargetLivingEntityEvent;
+import org.bukkit.event.entity.ExplosionPrimeEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.ItemStack;
@@ -26,6 +21,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 import plugin.sample.command.LevelUpCommand;
 import plugin.sample.command.LightningCommand;
+
+import java.util.*;
 
 public final class Main extends JavaPlugin implements Listener {
 
@@ -397,6 +394,26 @@ public final class Main extends JavaPlugin implements Listener {
       }
     }
   }
+
+  /**
+   * プレイヤーがダイヤモンドのクワを空気に向かって振ると、プレイヤーの居る地点から
+   * 手前に１マスy軸にマイナス2マスの位置にその場所が空気の時ガラスを生成する
+   *
+   * @param e プレイヤーがダイヤモンドのクワを振った時
+   */
+    @EventHandler
+    public void onPlayerDiamondHoeSwing(PlayerInteractEvent e) {
+        Player player = e.getPlayer();
+        ItemStack mainItem = player.getInventory().getItemInMainHand();
+      Location l = player.getLocation();
+      Vector v = l.getDirection();
+      Location l2 = l.add(v).add(0, -1, 0);
+        if (mainItem.getType() == Material.DIAMOND_HOE && e.getAction() == Action.RIGHT_CLICK_AIR
+        && l2.getBlock().getType() == Material.AIR) {
+            World world = player.getWorld();
+            world.getBlockAt(l2).setType(Material.GLASS);
+        }
+    }
 
 //  /**
 //   * スニークスポナー(検証用)
